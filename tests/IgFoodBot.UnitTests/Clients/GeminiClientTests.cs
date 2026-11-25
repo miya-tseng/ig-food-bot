@@ -1,11 +1,11 @@
 using System.Net;
-using System.Text;
 using System.Text.Json;
-using IgFoodBot.Api.Gemini;
+using System.Text;
+using IgFoodBot.Api.Clients;
 using IgFoodBot.Api.Options;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace IgFoodBot.UnitTests.Gemini;
+namespace IgFoodBot.UnitTests.Clients;
 
 public class GeminiClientTests
 {

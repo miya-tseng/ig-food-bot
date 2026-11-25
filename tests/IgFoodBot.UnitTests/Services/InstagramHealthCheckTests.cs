@@ -1,11 +1,11 @@
 using System.Net;
-using IgFoodBot.Api.Health;
-using IgFoodBot.Api.Instagram;
+using IgFoodBot.Api.Clients;
 using IgFoodBot.Api.Options;
+using IgFoodBot.Api.Services;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace IgFoodBot.UnitTests.Health;
+namespace IgFoodBot.UnitTests.Services;
 
 public class InstagramHealthCheckTests
 {

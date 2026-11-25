@@ -1,7 +1,7 @@
-using IgFoodBot.Api.Gemini;
-using IgFoodBot.Api.Processing;
+using IgFoodBot.Api.Models;
+using IgFoodBot.Api.Services;
 
-namespace IgFoodBot.UnitTests.Processing;
+namespace IgFoodBot.UnitTests.Services;
 
 public class SearchQueryBuilderTests
 {

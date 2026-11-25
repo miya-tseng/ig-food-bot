@@ -1,10 +1,10 @@
 using System.Security.Cryptography;
 using System.Text;
-using IgFoodBot.Api.Instagram;
 using IgFoodBot.Api.Options;
+using IgFoodBot.Api.Services;
 using Microsoft.Extensions.Options;
 
-namespace IgFoodBot.UnitTests.Instagram;
+namespace IgFoodBot.UnitTests.Services;
 
 public class WebhookSignatureValidatorTests
 {

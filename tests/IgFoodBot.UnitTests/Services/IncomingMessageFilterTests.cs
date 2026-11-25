@@ -1,10 +1,10 @@
-using IgFoodBot.Api.Instagram;
+using IgFoodBot.Api.Models;
 using IgFoodBot.Api.Options;
-using IgFoodBot.Api.Processing;
+using IgFoodBot.Api.Services;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace IgFoodBot.UnitTests.Processing;
+namespace IgFoodBot.UnitTests.Services;
 
 public class IncomingMessageFilterTests
 {

@@ -1,9 +1,8 @@
-using IgFoodBot.Api.Gemini;
-using IgFoodBot.Api.Instagram;
-using IgFoodBot.Api.Places;
-using IgFoodBot.Api.Processing;
+using IgFoodBot.Api.Clients;
+using IgFoodBot.Api.Models;
+using IgFoodBot.Api.Services;
 
-namespace IgFoodBot.UnitTests.Processing;
+namespace IgFoodBot.UnitTests.Services;
 
 public class ReplyFormatterTests
 {
