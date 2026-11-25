@@ -1,6 +1,6 @@
-using IgFoodBot.Api.Gemini;
+using IgFoodBot.Api.Models;
 
-namespace IgFoodBot.Api.Processing;
+namespace IgFoodBot.Api.Services;
 
 public static class SearchQueryBuilder
 {

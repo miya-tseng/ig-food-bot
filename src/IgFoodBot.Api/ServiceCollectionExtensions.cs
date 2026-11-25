@@ -1,10 +1,6 @@
-using IgFoodBot.Api.Currency;
-using IgFoodBot.Api.Gemini;
-using IgFoodBot.Api.Health;
-using IgFoodBot.Api.Instagram;
+using IgFoodBot.Api.Clients;
 using IgFoodBot.Api.Options;
-using IgFoodBot.Api.Places;
-using IgFoodBot.Api.Processing;
+using IgFoodBot.Api.Services;
 
 namespace IgFoodBot.Api;
 

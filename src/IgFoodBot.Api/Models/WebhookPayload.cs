@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace IgFoodBot.Api.Instagram;
+namespace IgFoodBot.Api.Models;
 
 public sealed record WebhookPayload(
     [property: JsonPropertyName("object")] string? Object,

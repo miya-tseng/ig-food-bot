@@ -1,9 +1,7 @@
-using IgFoodBot.Api.Currency;
-using IgFoodBot.Api.Gemini;
-using IgFoodBot.Api.Instagram;
-using IgFoodBot.Api.Places;
+using IgFoodBot.Api.Clients;
+using IgFoodBot.Api.Models;
 
-namespace IgFoodBot.Api.Processing;
+namespace IgFoodBot.Api.Services;
 
 public sealed class MessageProcessor(
     InstagramMessenger messenger,
@@ -97,7 +95,7 @@ public sealed class MessageProcessor(
     {
         try
         {
-            await messenger.SendTextAsync(participants, ReplyFormatter.Failed, cancellationToken);
+            await messenger.SendAsync(participants, new TextMessage(ReplyFormatter.Failed), cancellationToken);
         }
         catch (Exception exception) when (!cancellationToken.IsCancellationRequested)
         {

@@ -6,7 +6,7 @@
 
 ```
 IG 分享貼文給 yummy.pin
-  → Meta 依 webhook 訂閱，把訊息 POST 到 Cloud Run 的 /webhook
+  → Meta 依 webhook 訂閱，把訊息 POST 到 Cloud Run 的 /webhook（WebhookController）
   → 驗證 X-Hub-Signature-256
   → Gemini 讀貼文文字（Reels 會附上完整貼文內容）與圖片，產生店名、地區、國家、搜尋字串、摘要、推薦餐點
   → Google Places 依序用多組搜尋字串找店，只接受餐廳類結果

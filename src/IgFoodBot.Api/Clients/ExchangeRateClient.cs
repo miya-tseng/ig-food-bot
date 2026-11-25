@@ -1,8 +1,8 @@
 using System.Text.Json.Serialization;
-using IgFoodBot.Api.Places;
+using IgFoodBot.Api.Models;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace IgFoodBot.Api.Currency;
+namespace IgFoodBot.Api.Clients;
 
 public sealed class ExchangeRateClient(HttpClient httpClient, IMemoryCache cache, ILogger<ExchangeRateClient> logger)
 {

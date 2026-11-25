@@ -1,9 +1,10 @@
 using System.Globalization;
 using System.Text.Json.Serialization;
+using IgFoodBot.Api.Models;
 using IgFoodBot.Api.Options;
 using Microsoft.Extensions.Options;
 
-namespace IgFoodBot.Api.Places;
+namespace IgFoodBot.Api.Clients;
 
 public sealed class PlacesClient(HttpClient httpClient, IOptions<GooglePlacesOptions> options, ILogger<PlacesClient> logger)
 {

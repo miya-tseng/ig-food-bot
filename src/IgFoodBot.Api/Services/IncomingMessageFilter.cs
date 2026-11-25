@@ -1,8 +1,8 @@
-using IgFoodBot.Api.Instagram;
+using IgFoodBot.Api.Models;
 using IgFoodBot.Api.Options;
 using Microsoft.Extensions.Options;
 
-namespace IgFoodBot.Api.Processing;
+namespace IgFoodBot.Api.Services;
 
 public sealed class IncomingMessageFilter(
     ProcessedMessageTracker processedMessages,

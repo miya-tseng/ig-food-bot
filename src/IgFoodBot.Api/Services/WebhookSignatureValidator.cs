@@ -3,7 +3,7 @@ using System.Text;
 using IgFoodBot.Api.Options;
 using Microsoft.Extensions.Options;
 
-namespace IgFoodBot.Api.Instagram;
+namespace IgFoodBot.Api.Services;
 
 public sealed class WebhookSignatureValidator(IOptions<InstagramOptions> options)
 {

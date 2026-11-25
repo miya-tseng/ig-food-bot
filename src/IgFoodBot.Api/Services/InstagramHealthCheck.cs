@@ -1,9 +1,9 @@
-using IgFoodBot.Api.Instagram;
+using IgFoodBot.Api.Clients;
 using IgFoodBot.Api.Options;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 
-namespace IgFoodBot.Api.Health;
+namespace IgFoodBot.Api.Services;
 
 public sealed class InstagramHealthCheck(
     InstagramMessenger messenger,

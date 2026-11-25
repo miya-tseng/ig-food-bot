@@ -1,4 +1,4 @@
-namespace IgFoodBot.Api.Instagram;
+namespace IgFoodBot.Api.Models;
 
 public abstract record OutgoingMessage
 {

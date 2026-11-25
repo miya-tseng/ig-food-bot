@@ -1,4 +1,4 @@
-namespace IgFoodBot.Api.Places;
+namespace IgFoodBot.Api.Models;
 
 public sealed record PlaceResult(
     string Name,

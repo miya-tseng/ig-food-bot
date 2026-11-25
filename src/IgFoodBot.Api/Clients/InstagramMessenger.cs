@@ -1,9 +1,9 @@
 using System.Net.Http.Headers;
-using IgFoodBot.Api.Gemini;
+using IgFoodBot.Api.Models;
 using IgFoodBot.Api.Options;
 using Microsoft.Extensions.Options;
 
-namespace IgFoodBot.Api.Instagram;
+namespace IgFoodBot.Api.Clients;
 
 public sealed class InstagramMessenger(HttpClient httpClient, IOptions<InstagramOptions> options, ILogger<InstagramMessenger> logger)
 {
@@ -11,9 +11,6 @@ public sealed class InstagramMessenger(HttpClient httpClient, IOptions<Instagram
     private const int MaxCardTextLength = 80;
     private const int MaxButtonTitleLength = 20;
     private const long MaxImageBytes = 8 * 1024 * 1024;
-
-    public Task SendTextAsync(ConversationParticipants participants, string text, CancellationToken cancellationToken) =>
-        SendAsync(participants, new TextMessage(text), cancellationToken);
 
     public async Task SendAsync(ConversationParticipants participants, OutgoingMessage message, CancellationToken cancellationToken)
     {

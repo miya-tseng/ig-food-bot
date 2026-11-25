@@ -1,4 +1,4 @@
-namespace IgFoodBot.Api.Processing;
+namespace IgFoodBot.Api.Services;
 
 public static class CuisineEmoji
 {

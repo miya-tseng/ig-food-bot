@@ -1,12 +1,11 @@
 using System.Net;
-using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Json;
+using IgFoodBot.Api.Models;
 using IgFoodBot.Api.Options;
 using Microsoft.Extensions.Options;
 
-namespace IgFoodBot.Api.Gemini;
-
-public sealed record ImageInput(byte[] Data, string MimeType);
+namespace IgFoodBot.Api.Clients;
 
 public sealed class GeminiClient(HttpClient httpClient, IOptions<GeminiOptions> options, ILogger<GeminiClient> logger)
 {
@@ -142,19 +141,33 @@ public sealed class GeminiClient(HttpClient httpClient, IOptions<GeminiOptions> 
         public static ModelAttempt Failed(bool canTryNextModel) => new(null, canTryNextModel);
     }
 
-    private sealed record GenerateContentRequest(IReadOnlyList<Content> Contents, GenerationConfig GenerationConfig);
+    private sealed record GenerateContentRequest(
+        [property: JsonPropertyName("contents")] IReadOnlyList<Content> Contents,
+        [property: JsonPropertyName("generationConfig")] GenerationConfig GenerationConfig);
 
-    private sealed record GenerationConfig(string ResponseMimeType, object ResponseSchema, ThinkingConfig? ThinkingConfig);
+    private sealed record GenerationConfig(
+        [property: JsonPropertyName("responseMimeType")] string ResponseMimeType,
+        [property: JsonPropertyName("responseSchema")] object ResponseSchema,
+        [property: JsonPropertyName("thinkingConfig")] ThinkingConfig? ThinkingConfig);
 
-    private sealed record ThinkingConfig(string ThinkingLevel);
+    private sealed record ThinkingConfig(
+        [property: JsonPropertyName("thinkingLevel")] string ThinkingLevel);
 
-    private sealed record Content(string? Role, IReadOnlyList<Part>? Parts);
+    private sealed record Content(
+        [property: JsonPropertyName("role")] string? Role,
+        [property: JsonPropertyName("parts")] IReadOnlyList<Part>? Parts);
 
-    private sealed record Part(string? Text = null, InlineData? InlineData = null);
+    private sealed record Part(
+        [property: JsonPropertyName("text")] string? Text = null,
+        [property: JsonPropertyName("inlineData")] InlineData? InlineData = null);
 
-    private sealed record InlineData(string MimeType, string Data);
+    private sealed record InlineData(
+        [property: JsonPropertyName("mimeType")] string MimeType,
+        [property: JsonPropertyName("data")] string Data);
 
-    private sealed record GenerateContentResponse(IReadOnlyList<Candidate>? Candidates);
+    private sealed record GenerateContentResponse(
+        [property: JsonPropertyName("candidates")] IReadOnlyList<Candidate>? Candidates);
 
-    private sealed record Candidate(Content? Content);
+    private sealed record Candidate(
+        [property: JsonPropertyName("content")] Content? Content);
 }

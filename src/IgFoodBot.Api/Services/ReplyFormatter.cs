@@ -1,9 +1,8 @@
 using System.Globalization;
-using IgFoodBot.Api.Gemini;
-using IgFoodBot.Api.Instagram;
-using IgFoodBot.Api.Places;
+using IgFoodBot.Api.Clients;
+using IgFoodBot.Api.Models;
 
-namespace IgFoodBot.Api.Processing;
+namespace IgFoodBot.Api.Services;
 
 public static class ReplyFormatter
 {
