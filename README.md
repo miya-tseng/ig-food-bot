@@ -52,6 +52,15 @@ Cloud Run 平常縮到 0 台，有 webhook 進來才啟動，第一次可能多 
 
 帳單帳戶已設定每月 NT$100 的預算警示（`monthly-alert`，10% / 50% / 90% / 100% 寄信，不扣除抵免額）。
 
+## 監控與警示
+
+| 警示 | 觸發條件 | 用途 |
+|---|---|---|
+| `IG Food Bot - Instagram API unavailable` | Uptime check 每 15 分鐘呼叫 `/health/instagram`，失敗即通知 | Meta 封鎖 App 或權杖失效時，webhook 不會再進來，只能靠主動檢查發現 |
+| `IG Food Bot - Errors in logs` | Cloud Run 出現 `fail:` / `crit:` 開頭的 IgFoodBot 記錄，每小時最多通知一次 | Instagram、Gemini、Places 呼叫失敗 |
+
+通知會寄到 Monitoring 的 Email 通知管道。`/health/instagram` 需要設定 `Instagram:AccountId`，結果快取 5 分鐘。
+
 ## 1. 準備金鑰
 
 ### Gemini
@@ -147,7 +156,7 @@ gcloud run services update ig-food-bot --region asia-east1 --update-secrets "Gem
 並讓 IG 帳號訂閱 App：
 
 ```bash
-curl -X POST "https://graph.facebook.com/v23.0/<IG_ACCOUNT_ID>/subscribed_apps" \
+curl -X POST "https://graph.facebook.com/v27.0/<IG_ACCOUNT_ID>/subscribed_apps" \
   -H "Authorization: Bearer <access-token>" \
   --data-urlencode "subscribed_fields=messages"
 ```
@@ -167,10 +176,12 @@ Meta App 在**開發模式**時，只有在「應用程式角色」中有角色�
 | `Instagram:AppSecret` | 驗證 `X-Hub-Signature-256` | |
 | `Instagram:AccessToken` | 發送訊息用的權杖 | |
 | `Instagram:GraphApiBaseUrl` | Graph API 網址 | `https://graph.facebook.com` |
-| `Instagram:GraphApiVersion` | Graph API 版本 | `v23.0` |
+| `Instagram:GraphApiVersion` | Graph API 版本 | `v27.0` |
 | `Instagram:AllowedSenderIds` | 允許使用 bot 的 IG 使用者 ID，空陣列代表不限制 | `[]` |
+| `Instagram:AccountId` | bot 的 IG 帳號 ID，`/health/instagram` 用來檢查 API 是否可用 | |
 | `Gemini:ApiKey` | Gemini API key | |
 | `Gemini:Model` | 模型名稱 | `gemini-3.5-flash-lite` |
+| `Gemini:FallbackModels` | 主模型重試後仍失敗時依序改用的模型 | `["gemini-3.1-flash-lite"]` |
 | `Gemini:ThinkingLevel` | 思考程度，`minimal` 最快；留空則使用模型預設 | `minimal` |
 | `GooglePlaces:ApiKey` | Places API key | |
 | `GooglePlaces:LanguageCode` | 地點名稱語言 | `zh-TW` |
@@ -189,7 +200,8 @@ gcloud logging read 'resource.labels.service_name="ig-food-bot" AND textPayload:
 |---|---|
 | `Handling message` | 收到的訊息與附件類型 |
 | `Resolved` | 貼文店名、搜尋字串、找到的店 |
-| `Gemini returned 503, retrying` | Gemini 忙碌，自動重試 |
+| `Gemini ... returned 503, retrying` | Gemini 忙碌，自動重試 |
+| `Gemini request failed with <model>` | 該模型失敗，改用 `FallbackModels` 中的下一個 |
 
 Log 預設保留 30 天。需要看完整 webhook 內容與回覆文字時，暫時開啟 Debug：
 
@@ -205,6 +217,7 @@ gcloud run services update ig-food-bot --region asia-east1 --remove-env-vars Log
 | 啟動失敗並列出缺少的欄位 | 必要金鑰沒設定 |
 | 回「這篇我認不出是哪一家店」 | Gemini 失敗（看 log 的 `Gemini request failed`）或貼文沒有店名 |
 | Gemini `402` | Gemini key 所在的專案連結了帳單 |
-| Gemini `503` | 免費方案忙碌，已自動重試 2 次 |
+| Gemini `503` | 免費方案忙碌，已自動重試 2 次，仍失敗則改用備用模型 |
 | 找到地址而不是店家 | 搜尋字串只有地址；目前會跳過非餐廳類結果 |
 | 別人傳訊息 bot 沒反應 | App 在開發模式，對方不是測試人員 |
+| 所有人都沒反應、`/health/instagram` 回 503 | Meta 封鎖 App（`API access blocked`）或權杖失效，到 Meta App 主控板查看 |
