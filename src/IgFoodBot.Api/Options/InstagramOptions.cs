@@ -19,7 +19,9 @@ public sealed class InstagramOptions
     public string GraphApiBaseUrl { get; set; } = "https://graph.facebook.com";
 
     [Required]
-    public string GraphApiVersion { get; set; } = "v23.0";
+    public string GraphApiVersion { get; set; } = "v27.0";
 
     public string[] AllowedSenderIds { get; set; } = [];
+
+    public string? AccountId { get; set; }
 }

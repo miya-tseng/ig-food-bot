@@ -28,6 +28,25 @@ public sealed class InstagramMessenger(HttpClient httpClient, IOptions<Instagram
         }
     }
 
+    public async Task<string?> CheckAccountAccessAsync(string accountId, CancellationToken cancellationToken)
+    {
+        var settings = options.Value;
+        using var request = new HttpRequestMessage(HttpMethod.Get, $"{settings.GraphApiBaseUrl.TrimEnd('/')}/{settings.GraphApiVersion}/{accountId}?fields=id");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", settings.AccessToken);
+
+        try
+        {
+            using var response = await httpClient.SendAsync(request, cancellationToken);
+            return response.IsSuccessStatusCode
+                ? null
+                : $"{(int)response.StatusCode} {await response.Content.ReadAsStringAsync(cancellationToken)}";
+        }
+        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
+        {
+            return exception.Message;
+        }
+    }
+
     private async Task PostMessageAsync(ConversationParticipants participants, object messagePayload, CancellationToken cancellationToken)
     {
         var settings = options.Value;

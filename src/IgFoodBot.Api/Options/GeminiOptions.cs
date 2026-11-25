@@ -12,5 +12,7 @@ public sealed class GeminiOptions
     [Required]
     public string Model { get; set; } = "gemini-3.5-flash-lite";
 
+    public string[] FallbackModels { get; set; } = [];
+
     public string? ThinkingLevel { get; set; } = "minimal";
 }

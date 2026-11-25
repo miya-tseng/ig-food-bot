@@ -1,4 +1,5 @@
 using IgFoodBot.Api;
+using IgFoodBot.Api.Health;
 using IgFoodBot.Api.Webhook;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,5 +15,6 @@ var app = builder.Build();
 
 app.MapGet("/", () => "IG Food Bot is running");
 app.MapWebhookEndpoints();
+app.MapHealthEndpoints();
 
 app.Run();

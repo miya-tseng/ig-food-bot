@@ -1,5 +1,6 @@
 using IgFoodBot.Api.Currency;
 using IgFoodBot.Api.Gemini;
+using IgFoodBot.Api.Health;
 using IgFoodBot.Api.Instagram;
 using IgFoodBot.Api.Options;
 using IgFoodBot.Api.Places;
@@ -19,6 +20,7 @@ public static class ServiceCollectionExtensions
         services.AddMemoryCache();
         services.AddSingleton<ProcessedMessageTracker>();
         services.AddSingleton<IncomingMessageFilter>();
+        services.AddScoped<InstagramHealthCheck>();
         services.AddSingleton<WebhookSignatureValidator>();
         services.AddScoped<MessageProcessor>();
 

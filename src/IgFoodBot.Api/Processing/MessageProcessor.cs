@@ -40,7 +40,7 @@ public sealed class MessageProcessor(
             var replies = await BuildRepliesAsync(message, cancellationToken);
             await SendRepliesAsync(participants, replies, cancellationToken);
         }
-        catch (Exception exception) when (exception is not OperationCanceledException)
+        catch (Exception exception) when (!cancellationToken.IsCancellationRequested)
         {
             logger.LogError(exception, "Failed to handle message {Mid}", message.Mid);
             await TrySendFailureNoticeAsync(participants, cancellationToken);
@@ -99,7 +99,7 @@ public sealed class MessageProcessor(
         {
             await messenger.SendTextAsync(participants, ReplyFormatter.Failed, cancellationToken);
         }
-        catch (Exception exception) when (exception is not OperationCanceledException)
+        catch (Exception exception) when (!cancellationToken.IsCancellationRequested)
         {
             logger.LogError(exception, "Failed to send failure notice to {SenderId}", participants.SenderId);
         }

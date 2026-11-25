@@ -52,35 +52,62 @@ public sealed class GeminiClient(HttpClient httpClient, IOptions<GeminiOptions> 
         var settings = options.Value;
         var requestBody = BuildRequest(postText, images, settings);
 
-        using var response = await SendWithRetryAsync(requestBody, settings, cancellationToken);
-        if (!response.IsSuccessStatusCode)
+        foreach (var model in settings.FallbackModels.Prepend(settings.Model).Distinct())
         {
-            var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
-            logger.LogError("Gemini request failed: {StatusCode} {Body}", (int)response.StatusCode, errorBody);
-            return null;
+            var attempt = await TryAnalyzeWithModelAsync(model, requestBody, settings.ApiKey, cancellationToken);
+            if (attempt.Insight is not null || !attempt.CanTryNextModel)
+            {
+                return attempt.Insight;
+            }
         }
 
-        var result = await response.Content.ReadFromJsonAsync<GenerateContentResponse>(JsonOptions, cancellationToken);
-        var generatedJson = result?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text;
-        if (string.IsNullOrWhiteSpace(generatedJson))
-        {
-            logger.LogWarning("Gemini returned no content");
-            return null;
-        }
-
-        return JsonSerializer.Deserialize<RestaurantInsight>(generatedJson, JsonOptions);
+        return null;
     }
 
-    private async Task<HttpResponseMessage> SendWithRetryAsync(GenerateContentRequest requestBody, GeminiOptions settings, CancellationToken cancellationToken)
+    private async Task<ModelAttempt> TryAnalyzeWithModelAsync(string model, GenerateContentRequest requestBody, string apiKey, CancellationToken cancellationToken)
+    {
+        try
+        {
+            using var response = await SendWithRetryAsync(model, requestBody, apiKey, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                logger.LogError("Gemini request failed with {Model}: {StatusCode} {Body}", model, (int)response.StatusCode, errorBody);
+                return ModelAttempt.Failed(CanFallBackFrom(response.StatusCode));
+            }
+
+            var result = await response.Content.ReadFromJsonAsync<GenerateContentResponse>(JsonOptions, cancellationToken);
+            var generatedJson = result?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text;
+            if (string.IsNullOrWhiteSpace(generatedJson))
+            {
+                logger.LogWarning("Gemini returned no content with {Model}", model);
+                return ModelAttempt.Failed(canTryNextModel: true);
+            }
+
+            return new ModelAttempt(JsonSerializer.Deserialize<RestaurantInsight>(generatedJson, JsonOptions), CanTryNextModel: true);
+        }
+        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException or JsonException
+                                          && !cancellationToken.IsCancellationRequested)
+        {
+            logger.LogError(exception, "Gemini request failed with {Model}", model);
+            return ModelAttempt.Failed(canTryNextModel: true);
+        }
+    }
+
+    private static bool CanFallBackFrom(HttpStatusCode statusCode) =>
+        statusCode is HttpStatusCode.NotFound or HttpStatusCode.RequestTimeout or HttpStatusCode.TooManyRequests
+        || (int)statusCode >= 500;
+
+    private async Task<HttpResponseMessage> SendWithRetryAsync(string model, GenerateContentRequest requestBody, string apiKey, CancellationToken cancellationToken)
     {
         for (var attempt = 1; ; attempt++)
         {
             using var request = new HttpRequestMessage(HttpMethod.Post,
-                $"https://generativelanguage.googleapis.com/v1beta/models/{settings.Model}:generateContent")
+                $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent")
             {
                 Content = JsonContent.Create(requestBody, options: JsonOptions)
             };
-            request.Headers.Add("x-goog-api-key", settings.ApiKey);
+            request.Headers.Add("x-goog-api-key", apiKey);
 
             var response = await httpClient.SendAsync(request, cancellationToken);
             if (!IsTransientFailure(response.StatusCode) || attempt > MaxRetries)
@@ -88,7 +115,7 @@ public sealed class GeminiClient(HttpClient httpClient, IOptions<GeminiOptions> 
                 return response;
             }
 
-            logger.LogWarning("Gemini returned {StatusCode}, retrying (attempt {Attempt})", (int)response.StatusCode, attempt);
+            logger.LogWarning("Gemini {Model} returned {StatusCode}, retrying (attempt {Attempt})", model, (int)response.StatusCode, attempt);
             response.Dispose();
             await Task.Delay(RetryDelay * attempt, cancellationToken);
         }
@@ -108,6 +135,11 @@ public sealed class GeminiClient(HttpClient httpClient, IOptions<GeminiOptions> 
         return new GenerateContentRequest(
             [new Content("user", [textPart, .. imageParts])],
             new GenerationConfig("application/json", ResponseSchema, thinkingConfig));
+    }
+
+    private sealed record ModelAttempt(RestaurantInsight? Insight, bool CanTryNextModel)
+    {
+        public static ModelAttempt Failed(bool canTryNextModel) => new(null, canTryNextModel);
     }
 
     private sealed record GenerateContentRequest(IReadOnlyList<Content> Contents, GenerationConfig GenerationConfig);
